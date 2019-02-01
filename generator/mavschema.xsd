@@ -161,7 +161,8 @@
         <xs:attribute ref="increment"/>
         <xs:attribute ref="minValue"/>
         <xs:attribute ref="maxValue"/>
-    </xs:complexType>
+        <xs:assert test="false()"/>
+     </xs:complexType>
 </xs:element>
 
 <xs:element name="deprecated">
