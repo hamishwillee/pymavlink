@@ -16,9 +16,14 @@ import os
 import re
 import sys
 from . import mavparse
+from . import schematron_validator
 
 # XSD schema file
 schemaFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "mavschema.xsd")
+
+# Schematron schema file
+#schematronFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "schematron.map")
+
 
 # Set defaults for generating MAVLink code
 DEFAULT_WIRE_PROTOCOL = mavparse.PROTOCOL_1_0
@@ -61,6 +66,10 @@ def mavgen(opts, args):
             print("WARNING: Unable to load XML validator libraries. XML validation will not be performed", file=sys.stderr)
             opts.validate = False
 
+        schematron_validator.load_validator()
+
+
+
     def mavgen_validate(xmlfile):
         """Uses lxml to validate an XML file. We define mavgen_validate
            here because it relies on the XML libs that were loaded in mavgen(), so it can't be called standalone"""
@@ -88,11 +97,15 @@ def mavgen(opts, args):
             sys.exit('ERROR: %s' % str(err.error_log))
         return True
 
+
+
     # Process all XML files, validating them as necessary.
     for fname in args:
         if opts.validate:
             print("Validating %s" % fname)
             if not mavgen_validate(fname):
+                return False
+            if not schematron_validator.validate(fname):
                 return False
         else:
             print("Validation skipped for %s." % fname)

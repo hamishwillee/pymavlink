@@ -1,0 +1,22 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron">
+  <title>Test: FIRST TEST</title>
+
+   <pattern id="param_index_unique">
+     <title>Pattern index must be unique</title>
+     <rule context="entry">
+       <report test="count(param[@index=1]) > 1"> <value-of select="@name"/>: Duplicate param index: 1. </report>
+       <report test="count(param[@index=2]) > 1"> <value-of select="@name"/>: Duplicate param index: 2. </report>
+       <report test="count(param[@index=3]) > 1"> <value-of select="@name"/>: Duplicate param index: 3. </report>
+       <report test="count(param[@index=4]) > 1"> <value-of select="@name"/>: Duplicate param index: 4. </report>
+       <report test="count(param[@index=5]) > 1"> <value-of select="@name"/>: Duplicate param index: 5. </report>
+       <report test="count(param[@index=6]) > 1"> <value-of select="@name"/>: Duplicate param index: 6. </report>
+       <report test="count(param[@index>7]) > 1"> <value-of select="@name"/>: Duplicate param index: 7. </report>
+       <report test="param[@index>7]"> <value-of select="@name"/>: Param index greater than 7. </report>
+       <report test="param[@index&lt;1]"> <value-of select="@name"/>: Param index less than 1. </report>
+     </rule>
+   </pattern>
+
+
+</schema>
+
+
