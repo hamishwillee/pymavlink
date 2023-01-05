@@ -116,11 +116,14 @@ def mavgen(opts, args):
             if not expand_oneiteration():
                 break
 
+        mavparse.enum_range(xml)
+    
         if mavparse.check_duplicates(xml):
             return False
         if opts.validate and mavparse.check_missing_enum(xml):
             return False
         return True
+
 
     def update_includes():
         """Update dialects with crcs etc of included files.  Included files
@@ -246,6 +249,11 @@ def mavgen(opts, args):
 
     print("Found %u MAVLink message types in %u XML files" % (
         mavparse.total_msgs(xml), len(xml)))
+        
+    mavparse.msg_range(xml)
+    #mavparse.enum_range(xml)
+
+     
 
     # convert language option to lowercase and validate
     opts.language = opts.language.lower()

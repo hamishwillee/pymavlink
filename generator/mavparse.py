@@ -578,6 +578,59 @@ def total_msgs(xml):
     for x in xml:
         count += len(x.message)
     return count
+    
+    
+def msg_range(xml):
+    '''list messages and range'''
+    message_ids_dict=dict()
+    for x in xml:
+        xmlfilename = x.filename.split('/')[-1]
+        #print('XXXmsg:  ' + xmlfilename)
+        for m in x.message:
+            message_id = m.id
+            message_name = m.name
+            message_ids_dict[message_id]={'id': message_id, 'name': message_name, 'filename': xmlfilename}
+            #print(message_ids_dict)
+    #sort message_ids_dict by id
+    myKeys = list(message_ids_dict.keys())
+    myKeys.sort()
+    message_ids_sorted_dict = {i: message_ids_dict[i] for i in myKeys}
+ 
+    #print(message_ids_sorted_dict)
+    with open('message_allocation.csv', 'w') as writer:
+    # Write the dog breeds to the file in reversed order
+        for record in message_ids_sorted_dict.values():
+            outputline='%s,%s,%s\n' % (record['id'], record['filename'], record['name'])
+            writer.write(outputline)
+        
+def enum_range(xml):
+    '''list messages and range'''
+    print('ENUMRANGETEST')
+    command_ids_dict=dict()
+    for x in xml:
+        xmlfilename = x.filename.split('/')[-1]
+        print('XXXenum:  ' + xmlfilename)
+        for enum in x.enum:
+            if not 'MAV_CMD' == enum.name:
+                continue
+            for enumvalue in enum.entry:
+               command_ids_dict[enumvalue.value]={'id': enumvalue.value, 'name': enumvalue.name, 'filename': xmlfilename}
+
+    #sort by id
+    myKeys = list(command_ids_dict.keys())
+    myKeys.sort()
+    command_ids_sorted_dict = {i: command_ids_dict[i] for i in myKeys}
+ 
+    #print(message_ids_sorted_dict)
+    with open('command_allocation.csv', 'w') as writer:
+        for record in command_ids_sorted_dict.values():
+            outputline='%s,%s,%s\n' % (record['id'], record['filename'], record['name'])
+            writer.write(outputline)
+            newenums = []
+        for enum in x.enum:
+            if enum.name in emap:
+                emapitem = emap[enum.name]
+
 
 def mkdir_p(dir):
     try:
