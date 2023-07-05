@@ -627,9 +627,9 @@ def enum_range(xml):
             outputline='%s,%s,%s\n' % (record['id'], record['filename'], record['name'])
             writer.write(outputline)
             newenums = []
-        for enum in x.enum:
-            if enum.name in emap:
-                emapitem = emap[enum.name]
+        #for enum in x.enum:
+        #    if enum.name in emap:
+        #        emapitem = emap[enum.name]
 
 
 def mkdir_p(dir):
