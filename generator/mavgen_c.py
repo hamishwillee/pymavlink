@@ -20,14 +20,14 @@ def generate_version_h(directory, xml):
  *  @see http://mavlink.org
  */
 #pragma once
- 
+
 #ifndef MAVLINK_VERSION_H
 #define MAVLINK_VERSION_H
 
 #define MAVLINK_BUILD_DATE "${parse_time}"
 #define MAVLINK_WIRE_PROTOCOL_VERSION "${wire_protocol_version}"
 #define MAVLINK_MAX_DIALECT_PAYLOAD_SIZE ${largest_payload}
- 
+
 #endif // MAVLINK_VERSION_H
 ''', xml)
     f.close()
@@ -74,6 +74,11 @@ def generate_mavlink_h(directory, xml):
     f.close()
 
 def generate_main_h(directory, xml):
+    print(f"DEBUG XML IN GENERATE MAIN: {xml.filename}")
+    for index, e in enumerate(xml.enum):
+        print(f" {e.name} (mer {e.merged}) (cop {e.copied}) ")
+
+
     '''generate main header per XML file'''
     f = open(os.path.join(directory, xml.basename + ".h"), mode='w')
     t.write(f, '''
@@ -115,6 +120,7 @@ ${{enum:
 /** @brief ${description} */
 #ifndef HAVE_ENUM_${name}
 #define HAVE_ENUM_${name}
+/* copied: ${copied} merged: ${merged} */
 typedef enum ${name}
 {
 ${{entry:   ${name}=${value}, /* ${description} |${{param:${description}| }} */
@@ -158,7 +164,7 @@ ${{include_list:#include "../${base}/${base}.h"
 ''', xml)
 
     f.close()
-             
+
 
 def generate_message_h(directory, m):
     '''generate per-message header for a XML file'''
@@ -538,7 +544,7 @@ static void mavlink_test_${name_lower}(uint8_t system_id, uint8_t component_id, 
         }
     mavlink_msg_${name_lower}_decode(last_msg, &packet2);
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
-        
+
         memset(&packet2, 0, sizeof(packet2));
     mavlink_msg_${name_lower}_send(MAVLINK_COMM_1 ${{arg_fields:, packet1.${name} }});
     mavlink_msg_${name_lower}_decode(last_msg, &packet2);
@@ -718,9 +724,9 @@ def generate_one(basename, xml):
                 if f.type == 'char':
                     f.c_test_value = "'%s'" % f.test_value
                 elif f.type == 'uint64_t':
-                    f.c_test_value = "%sULL" % f.test_value                    
+                    f.c_test_value = "%sULL" % f.test_value
                 elif f.type == 'int64_t':
-                    f.c_test_value = "%sLL" % f.test_value                    
+                    f.c_test_value = "%sLL" % f.test_value
                 else:
                     f.c_test_value = f.test_value
         if m.needs_pack:
@@ -747,6 +753,24 @@ def generate_one(basename, xml):
             else:
                 f.putname = f.const_value
 
+    # Remove enums if copied and not merged
+    # (merged indicates import possibly from multiple paths)
+    print(f"XML REMOVE before generate_main_h: {xml.filename}")
+    keepEnums = []
+    for e in xml.enum:
+        print(f"deb {e.name}")
+        if not e.copied:
+            print(f"Keep: {e.name} - defined in this file (cop: {e.copied}) (mer: {e.merged})")
+            keepEnums.append(e)
+        elif e.merged:
+            print(f"Keep: {e.name} - merged - might be duplicated (cop: {e.copied}) (mer: {e.merged})")
+            keepEnums.append(e)
+        else:
+            print(f"Remove: {e.name} (cop: {e.copied}) (mer: {e.merged})")
+    xml.enum = keepEnums
+
+
+
     generate_mavlink_h(directory, xml)
     generate_version_h(directory, xml)
     generate_main_h(directory, xml)
@@ -756,10 +780,10 @@ def generate_one(basename, xml):
 
 
 def generate(basename, xml_list):
-    '''generate complete MAVLink C implemenation'''
+    '''generate complete MAVLink C implementation'''
 
     for idx in range(len(xml_list)):
         xml = xml_list[idx]
-        xml.xml_hash = hash(xml.basename)        
+        xml.xml_hash = hash(xml.basename)
         generate_one(basename, xml)
     copy_fixed_headers(basename, xml_list[0])
