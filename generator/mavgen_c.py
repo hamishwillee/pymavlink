@@ -621,15 +621,32 @@ class mav_include(object):
     def __init__(self, base):
         self.base = base
 
-def enum_flag_attribute(item):
-    '''attribute macro for an enum or enum entry flagged wip/deprecated/superseded'''
-    if item.wip:
-        return ' MAVLINK_ENUM_WIP'
-    if item.deprecated:
-        return ' MAVLINK_ENUM_DEPRECATED'
-    if item.superseded:
-        return ' MAVLINK_ENUM_SUPERSEDED'
-    return ''
+def flag_attributes(wip, deprecated, superseded):
+    '''attribute macros for wip/deprecated/superseded flags.  Every flag
+    that is set gets its macro, so a project that defines the macros
+    differently (e.g. WIP an error, deprecated a warning) sees each one'''
+    attributes = ''
+    if wip:
+        attributes += ' MAVLINK_ENUM_WIP'
+    if deprecated:
+        attributes += ' MAVLINK_ENUM_DEPRECATED'
+    if superseded:
+        attributes += ' MAVLINK_ENUM_SUPERSEDED'
+    return attributes
+
+
+def enum_flag_attribute(enum):
+    '''attribute macros for an enum flagged wip/deprecated/superseded'''
+    return flag_attributes(enum.wip, enum.deprecated, enum.superseded)
+
+
+def entry_flag_attribute(entry):
+    '''attribute macros for an enum entry: its own flags plus those of
+    the enum declaration it came from, which for an enum extended by
+    another XML file is not necessarily the merged enum'''
+    return flag_attributes(entry.wip or entry.enum_wip,
+                           entry.deprecated or entry.enum_deprecated,
+                           entry.superseded or entry.enum_superseded)
 
 
 def generate_one(basename, xml):
@@ -829,15 +846,15 @@ def generate_one(basename, xml):
             else:
                 f.putname = f.const_value
 
-    # add attribute for enums and enum/MAV_CMD entries flagged
-    # wip/deprecated/superseded.  An entry with no flag of its own
-    # inherits its enum's flag.  The enum's attribute goes on the
+    # add attributes for enums and enum/MAV_CMD entries flagged
+    # wip/deprecated/superseded.  An entry also carries the flags of the
+    # enum declaration it came from.  The enum's attributes go on the
     # typedef name, not the enum tag, so the typedef itself does not
-    # trigger it.
+    # trigger them.
     for enum in xml.enum:
         enum.ENUM_ATTRIBUTE = enum_flag_attribute(enum)
         for entry in enum.entry:
-            entry.ENTRY_ATTRIBUTE = enum_flag_attribute(entry) or enum.ENUM_ATTRIBUTE
+            entry.ENTRY_ATTRIBUTE = entry_flag_attribute(entry)
 
     generate_mavlink_h(directory, xml)
     generate_version_h(directory, xml)

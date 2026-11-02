@@ -113,15 +113,32 @@ static void use_flagged_enums(void)
     int w = WIP_ENUM_INHERITS_WIP;
     int d = DEPRECATED_ENUM_INHERITS_DEPRECATED;
     int s = SUPERSEDED_ENUM_INHERITS_SUPERSEDED;
+    int wd = WIP_ENUM_OWN_DEPRECATED;
     WIP_ENUM wt = 0;
     DEPRECATED_ENUM dt = 0;
     SUPERSEDED_ENUM st = 0;
     (void)w;
     (void)d;
     (void)s;
+    (void)wd;
     (void)wt;
     (void)dt;
     (void)st;
+}
+
+static void use_extended_enums(void)
+{
+    /* enums extended from wip_deprecated_superseded_base.xml: an entry
+       carries the flag of the declaration it came from, and the type is
+       flagged if any declaration is */
+    int b = EXTENDED_DEPRECATED_ENUM_FROM_FLAGGED_BASE;
+    int d = EXTENDED_WIP_ENUM_FROM_FLAGGED_DIALECT;
+    EXTENDED_DEPRECATED_ENUM bt = 0;
+    EXTENDED_WIP_ENUM dt = 0;
+    (void)b;
+    (void)d;
+    (void)bt;
+    (void)dt;
 }
 
 static void use_unflagged_enum(void)
@@ -132,6 +149,20 @@ static void use_unflagged_enum(void)
     (void)e;
 }
 
+static void use_unflagged_entries(void)
+{
+    /* none of these may be diagnosed: entries from an unflagged
+       declaration of an extended enum, and the generated end markers */
+    int d = EXTENDED_DEPRECATED_ENUM_FROM_UNFLAGGED_DIALECT;
+    int b = EXTENDED_WIP_ENUM_FROM_UNFLAGGED_BASE;
+    int we = WIP_ENUM_ENUM_END;
+    int de = DEPRECATED_ENUM_ENUM_END;
+    (void)d;
+    (void)b;
+    (void)we;
+    (void)de;
+}
+
 int main(void)
 {
     use_wip_message();
@@ -139,6 +170,8 @@ int main(void)
     use_superseded_message();
     use_flagged_enum_entries();
     use_flagged_enums();
+    use_extended_enums();
     use_unflagged_enum();
+    use_unflagged_entries();
     return 0;
 }

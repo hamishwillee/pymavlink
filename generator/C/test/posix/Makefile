@@ -65,7 +65,7 @@ test_diagnostics_be: test_diagnostics_be.c
 
 # Fixture dialect used by the positive test; generated on demand so a plain
 # `make` works without test_generator.sh having run first.
-../../include_v2.0/wip_deprecated_superseded/mavlink.h: ../../../../tests/wip_deprecated_superseded.xml
+../../include_v2.0/wip_deprecated_superseded/mavlink.h: ../../../../tests/wip_deprecated_superseded.xml ../../../../tests/wip_deprecated_superseded_base.xml
 	../../../../tools/mavgen.py --lang C -o ../../include_v2.0 --wire-protocol=2.0 $<
 
 .PHONY: test_diagnostics_positive
