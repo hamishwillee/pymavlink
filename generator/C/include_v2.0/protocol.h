@@ -36,6 +36,18 @@
 /*
   Opt-in compile-time diagnostics for MAVLink messages and MAV_CMD/enum
   entries flagged in the XML as work-in-progress, deprecated or superseded.
+  An enum's MAVLINK_ENUM_* macro is applied to its typedef name and to
+  each entry that enum declaration contains; an entry flagged itself also
+  carries its own macro. When an enum is extended in another XML file,
+  each entry carries only the flags of the declaration it came from, and
+  the typedef name carries the flags of every declaration. The generated
+  <ENUM>_ENUM_END marker is never flagged.
+  Limitations: the enum macro goes on the typedef name, not the enum tag,
+  so "enum MAV_FOO x;" is not diagnosed where "MAV_FOO x;" is. Message
+  fields holding enum values are plain integers, so using a flagged enum
+  only through a message field is not diagnosed. A clean build therefore
+  does not prove that no flagged enum is used. Only the C and C++11
+  generators emit these macros.
   Each macro defaults to a no-op; define it before including mavlink.h to
   get a diagnostic, and pick the attribute that matches how strict you want
   that category to be, e.g.:

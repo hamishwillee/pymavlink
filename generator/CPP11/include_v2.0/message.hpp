@@ -21,7 +21,16 @@
   they never annotate the C++11 message struct itself (see
   MAVLINK_MSG_TYPE_* below for that), but they do still apply to the plain
   C pack/encode/send/decode helper functions that TEST_INTEROP builds pull
-  in from mavlink.h alongside this header.
+  in from mavlink.h alongside this header. An enum's MAVLINK_ENUM_* macro
+  is applied to the enum class and to each entry that enum declaration
+  contains; an entry flagged itself also carries its own macro. When an
+  enum is extended in another XML file, each entry carries only the flags
+  of the declaration it came from, and the enum class carries the flags
+  of every declaration.
+  Limitations: message fields holding enum values are plain integers, so
+  using a flagged enum only through a message field is not diagnosed. A
+  clean build therefore does not prove that no flagged enum is used. Only
+  the C and C++11 generators emit these macros.
 */
 #ifndef MAVLINK_WIP
 #define MAVLINK_WIP

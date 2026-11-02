@@ -68,11 +68,58 @@ static void use_flagged_enum_entries()
     (void)s;
 }
 
+static void use_flagged_enums()
+{
+    // these enums are flagged as a whole: their entries carry no flag of
+    // their own and inherit the enum's, and the type name is flagged too
+    auto w = WIP_ENUM::INHERITS_WIP;
+    auto d = DEPRECATED_ENUM::INHERITS_DEPRECATED;
+    auto s = SUPERSEDED_ENUM::INHERITS_SUPERSEDED;
+    auto wd = WIP_ENUM::OWN_DEPRECATED;
+    (void)w;
+    (void)d;
+    (void)s;
+    (void)wd;
+}
+
+static void use_extended_enums()
+{
+    // enums extended from wip_deprecated_superseded_base.xml: an entry
+    // carries the flag of the declaration it came from, and the type is
+    // flagged if any declaration is
+    auto b = EXTENDED_DEPRECATED_ENUM::FROM_FLAGGED_BASE;
+    auto d = EXTENDED_WIP_ENUM::FROM_FLAGGED_DIALECT;
+    (void)b;
+    (void)d;
+}
+
+static void use_unflagged_enum()
+{
+    // neither of these may be diagnosed: an enum whose entries are flagged
+    // individually is not itself flagged, and nor are its other entries
+    ENTRY_FLAGS_ENUM e = ENTRY_FLAGS_ENUM::PLAIN;
+    (void)e;
+}
+
+static void use_unflagged_entries()
+{
+    // neither of these may be diagnosed: entries from an unflagged
+    // declaration of an extended enum
+    auto d = EXTENDED_DEPRECATED_ENUM::FROM_UNFLAGGED_DIALECT;
+    auto b = EXTENDED_WIP_ENUM::FROM_UNFLAGGED_BASE;
+    (void)d;
+    (void)b;
+}
+
 int main()
 {
     use_wip_message();
     use_deprecated_message();
     use_superseded_message();
     use_flagged_enum_entries();
+    use_flagged_enums();
+    use_extended_enums();
+    use_unflagged_enum();
+    use_unflagged_entries();
     return 0;
 }
