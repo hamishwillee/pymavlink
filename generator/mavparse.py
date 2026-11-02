@@ -190,6 +190,11 @@ class MAVEnumEntry(object):
         self.origin_file = origin_file
         self.origin_line = origin_line
         self.has_location = has_location
+        # wip/deprecated/superseded of the enum declaration this entry
+        # came from, which may differ from the merged enum's
+        self.enum_wip = False
+        self.enum_deprecated = None
+        self.enum_superseded = None
 
 class MAVEnum(object):
     def __init__(self, name, linenumber, description='', bitmask=False):
@@ -395,6 +400,15 @@ class MAVXML(object):
         p.CharacterDataHandler = char_data
         p.ParseFile(f)
         f.close()
+
+        # record each entry's enum-level flags now, while the entry is
+        # still with the declaration it came from: merge_enums() moves
+        # the entries of an extended enum into a single declaration
+        for current_enum in self.enum:
+            for enum_entry in current_enum.entry:
+                enum_entry.enum_wip = current_enum.wip
+                enum_entry.enum_deprecated = current_enum.deprecated
+                enum_entry.enum_superseded = current_enum.superseded
    
 
         #Post process to add reserved params (for docs)
@@ -556,6 +570,13 @@ def merge_enums(xml):
                 emapitem.entry.extend(enum.entry)
                 if not emapitem.description:
                     emapitem.description = enum.description
+                # the merged enum is flagged if any declaration of it is;
+                # the entries keep the flags of their own declaration
+                emapitem.wip = emapitem.wip or enum.wip
+                if emapitem.deprecated is None:
+                    emapitem.deprecated = enum.deprecated
+                if emapitem.superseded is None:
+                    emapitem.superseded = enum.superseded
                 print("Merged enum %s" % enum.name)
             else:
                 newenums.append(enum)

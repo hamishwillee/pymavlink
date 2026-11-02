@@ -12,6 +12,7 @@ except ImportError:
 
 from pymavlink.generator.mavparse import MAVXML
 from pymavlink.generator.mavparse import MAVParseError
+from pymavlink.generator.mavparse import merge_enums
 
 class MAVXMLTest(unittest.TestCase):
     """
@@ -91,6 +92,45 @@ class MAVXMLTest(unittest.TestCase):
         self.assertFalse(entries["ENTRY_FLAGS_ENUM_PLAIN"].wip)
         self.assertIsNone(entries["ENTRY_FLAGS_ENUM_PLAIN"].deprecated)
         self.assertIsNone(entries["ENTRY_FLAGS_ENUM_PLAIN"].superseded)
+
+        # entries record the flags of the enum declaration they came from
+        self.assertTrue(enums["WIP_ENUM"].entry[0].enum_wip)
+        self.assertIsNotNone(enums["DEPRECATED_ENUM"].entry[0].enum_deprecated)
+        self.assertIsNotNone(enums["SUPERSEDED_ENUM"].entry[0].enum_superseded)
+        self.assertFalse(entries["ENTRY_FLAGS_ENUM_WIP"].enum_wip)
+        self.assertIsNone(entries["ENTRY_FLAGS_ENUM_DEPRECATED"].enum_deprecated)
+        self.assertIsNone(entries["ENTRY_FLAGS_ENUM_SUPERSEDED"].enum_superseded)
+
+
+    def test_extended_enum_flags(self):
+        """Test that merging an extended enum keeps each declaration's flags with its own entries"""
+        dialect = MAVXML(importlib_files(__spec__.parent).joinpath("wip_deprecated_superseded.xml"))
+        base = MAVXML(importlib_files(__spec__.parent).joinpath("wip_deprecated_superseded_base.xml"))
+        # mavgen lists the including file before the files it includes
+        merge_enums([dialect, base])
+
+        enums = {e.name: e for e in dialect.enum}
+        self.assertNotIn("EXTENDED_DEPRECATED_ENUM", [e.name for e in base.enum])
+        self.assertNotIn("EXTENDED_WIP_ENUM", [e.name for e in base.enum])
+
+        # flagged in the included file only: the merged enum and the
+        # included file's entry are flagged, the extension's entry is not
+        merged = enums["EXTENDED_DEPRECATED_ENUM"]
+        self.assertIsNotNone(merged.deprecated)
+        self.assertEqual(merged.deprecated.replaced_by, "SOME_OTHER_ENUM")
+        entries = {e.name: e for e in merged.entry}
+        self.assertIsNotNone(entries["EXTENDED_DEPRECATED_ENUM_FROM_FLAGGED_BASE"].enum_deprecated)
+        self.assertIsNone(entries["EXTENDED_DEPRECATED_ENUM_FROM_UNFLAGGED_DIALECT"].enum_deprecated)
+        self.assertIsNone(entries["EXTENDED_DEPRECATED_ENUM_ENUM_END"].enum_deprecated)
+
+        # flagged in the including file only: the merged enum and the
+        # including file's entry are flagged, the included file's entry is not
+        merged = enums["EXTENDED_WIP_ENUM"]
+        self.assertTrue(merged.wip)
+        entries = {e.name: e for e in merged.entry}
+        self.assertFalse(entries["EXTENDED_WIP_ENUM_FROM_UNFLAGGED_BASE"].enum_wip)
+        self.assertTrue(entries["EXTENDED_WIP_ENUM_FROM_FLAGGED_DIALECT"].enum_wip)
+        self.assertFalse(entries["EXTENDED_WIP_ENUM_ENUM_END"].enum_wip)
 
 
 if __name__ == '__main__':
