@@ -111,6 +111,9 @@ for sym in \
     EXTENDED_WIP_ENUM_FROM_UNFLAGGED_BASE \
     WIP_ENUM_ENUM_END \
     DEPRECATED_ENUM_ENUM_END \
+    SUPERSEDED_ENUM_ENUM_END \
+    EXTENDED_DEPRECATED_ENUM_ENUM_END \
+    EXTENDED_WIP_ENUM_ENUM_END \
     ; do
     if grep -qE "(^|[^A-Za-z0-9_])${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
         echo "FAIL: unexpected diagnostic for ${sym}" >&2

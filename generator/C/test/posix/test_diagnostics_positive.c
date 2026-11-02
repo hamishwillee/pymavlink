@@ -157,10 +157,16 @@ static void use_unflagged_entries(void)
     int b = EXTENDED_WIP_ENUM_FROM_UNFLAGGED_BASE;
     int we = WIP_ENUM_ENUM_END;
     int de = DEPRECATED_ENUM_ENUM_END;
+    int se = SUPERSEDED_ENUM_ENUM_END;
+    int ede = EXTENDED_DEPRECATED_ENUM_ENUM_END;
+    int ewe = EXTENDED_WIP_ENUM_ENUM_END;
     (void)d;
     (void)b;
     (void)we;
     (void)de;
+    (void)se;
+    (void)ede;
+    (void)ewe;
 }
 
 int main(void)
