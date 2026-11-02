@@ -380,15 +380,32 @@ def fix_int8_t(v):
     return struct.unpack('b', struct.pack('B', v))[0]
 
 
-def enum_flag_attribute(item):
-    '''attribute macro for an enum or enum entry flagged wip/deprecated/superseded'''
-    if item.wip:
-        return ' MAVLINK_ENUM_WIP'
-    if item.deprecated:
-        return ' MAVLINK_ENUM_DEPRECATED'
-    if item.superseded:
-        return ' MAVLINK_ENUM_SUPERSEDED'
-    return ''
+def flag_attributes(wip, deprecated, superseded):
+    '''attribute macros for wip/deprecated/superseded flags.  Every flag
+    that is set gets its macro, so a project that defines the macros
+    differently (e.g. WIP an error, deprecated a warning) sees each one'''
+    attributes = ''
+    if wip:
+        attributes += ' MAVLINK_ENUM_WIP'
+    if deprecated:
+        attributes += ' MAVLINK_ENUM_DEPRECATED'
+    if superseded:
+        attributes += ' MAVLINK_ENUM_SUPERSEDED'
+    return attributes
+
+
+def enum_flag_attribute(enum):
+    '''attribute macros for an enum flagged wip/deprecated/superseded'''
+    return flag_attributes(enum.wip, enum.deprecated, enum.superseded)
+
+
+def entry_flag_attribute(entry):
+    '''attribute macros for an enum entry: its own flags plus those of
+    the enum declaration it came from, which for an enum extended by
+    another XML file is not necessarily the merged enum'''
+    return flag_attributes(entry.wip or entry.enum_wip,
+                           entry.deprecated or entry.enum_deprecated,
+                           entry.superseded or entry.enum_superseded)
 
 
 def generate_one(basename, xml):
@@ -511,14 +528,14 @@ def generate_one(basename, xml):
 
         # template do not support "if"
         # filter out ENUM_END, it often > than underlying type may handle
-        # an entry with no wip/deprecated/superseded flag of its own
-        # inherits its enum's; the enum's own attribute goes on the
-        # enum class itself
+        # an entry also carries the wip/deprecated/superseded flags of
+        # the enum declaration it came from; the enum's own attributes go
+        # on the enum class itself
         e.ENUM_ATTRIBUTE = enum_flag_attribute(e)
         e.entry_flt = []
         for f in e.entry:
             f.name_trim = enum_remove_prefix(e.name, f.name)
-            f.ENTRY_ATTRIBUTE = enum_flag_attribute(f) or e.ENUM_ATTRIBUTE
+            f.ENTRY_ATTRIBUTE = entry_flag_attribute(f)
             if not f.end_marker:
                 e.entry_flt.append(f)
                 # XXX check all values in acceptable range

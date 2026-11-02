@@ -35,7 +35,7 @@ test_diagnostics: test_diagnostics.cpp $(GENDIR)/all/all.hpp
 # see check_diagnostics_fire.sh.
 # Fixture dialect used by the positive test; generated on demand so a plain
 # `make` works without test_generator.sh having run first.
-$(GENDIR)/wip_deprecated_superseded/wip_deprecated_superseded.hpp: ../../../../tests/wip_deprecated_superseded.xml
+$(GENDIR)/wip_deprecated_superseded/wip_deprecated_superseded.hpp: ../../../../tests/wip_deprecated_superseded.xml ../../../../tests/wip_deprecated_superseded_base.xml
 	../../../../tools/mavgen.py --lang C++11 -o $(GENDIR) --wire-protocol=2.0 $<
 
 .PHONY: test_diagnostics_positive
