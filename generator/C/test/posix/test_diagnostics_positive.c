@@ -96,12 +96,8 @@ static void use_superseded_message(void)
 
 static void use_flagged_enum_entries(void)
 {
-    /* ENTRY_FLAGS_ENUM_A's own enum carries no <deprecated>/<superseded> of
-       its own - these two entries are flagged individually. (DEPRECATED_ENUM_A
-       and SUPERSEDED_ENUM_A, by contrast, are entries of enums that are
-       themselves flagged as a whole; neither backend currently emits
-       anything for that case - a separate, pre-existing gap - so they
-       wouldn't exercise MAVLINK_ENUM_DEPRECATED/SUPERSEDED at all.) */
+    /* ENTRY_FLAGS_ENUM itself carries no flag - these entries are
+       flagged individually. */
     int w = ENTRY_FLAGS_ENUM_WIP;
     int d = ENTRY_FLAGS_ENUM_DEPRECATED;
     int s = ENTRY_FLAGS_ENUM_SUPERSEDED;
@@ -110,11 +106,39 @@ static void use_flagged_enum_entries(void)
     (void)s;
 }
 
+static void use_flagged_enums(void)
+{
+    /* these enums are flagged as a whole: their entries carry no flag of
+       their own and inherit the enum's, and the type name is flagged too */
+    int w = WIP_ENUM_INHERITS_WIP;
+    int d = DEPRECATED_ENUM_INHERITS_DEPRECATED;
+    int s = SUPERSEDED_ENUM_INHERITS_SUPERSEDED;
+    WIP_ENUM wt = 0;
+    DEPRECATED_ENUM dt = 0;
+    SUPERSEDED_ENUM st = 0;
+    (void)w;
+    (void)d;
+    (void)s;
+    (void)wt;
+    (void)dt;
+    (void)st;
+}
+
+static void use_unflagged_enum(void)
+{
+    /* neither of these may be diagnosed: an enum whose entries are flagged
+       individually is not itself flagged, and nor are its other entries */
+    ENTRY_FLAGS_ENUM e = ENTRY_FLAGS_ENUM_PLAIN;
+    (void)e;
+}
+
 int main(void)
 {
     use_wip_message();
     use_deprecated_message();
     use_superseded_message();
     use_flagged_enum_entries();
+    use_flagged_enums();
+    use_unflagged_enum();
     return 0;
 }

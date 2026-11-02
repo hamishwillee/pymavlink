@@ -11,15 +11,15 @@
     <enum name="DEPRECATED_ENUM">
       <deprecated since="2024-01" replaced_by="SOME_OTHER_ENUM">Use SOME_OTHER_ENUM instead.</deprecated>
       <description>An enum flagged deprecated.</description>
-      <entry name="DEPRECATED_ENUM_A" value="0">
-        <description>Entry A.</description>
+      <entry name="DEPRECATED_ENUM_INHERITS_DEPRECATED" value="0">
+        <description>Entry with no flag of its own, in a flagged enum.</description>
       </entry>
     </enum>
     <enum name="SUPERSEDED_ENUM">
       <superseded since="2024-01" replaced_by="SOME_OTHER_ENUM">Use SOME_OTHER_ENUM instead.</superseded>
       <description>An enum flagged superseded.</description>
-      <entry name="SUPERSEDED_ENUM_A" value="0">
-        <description>Entry A.</description>
+      <entry name="SUPERSEDED_ENUM_INHERITS_SUPERSEDED" value="0">
+        <description>Entry with no flag of its own, in a flagged enum.</description>
       </entry>
     </enum>
     <enum name="ENTRY_FLAGS_ENUM">

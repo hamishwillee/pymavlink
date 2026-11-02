@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Drives test_diagnostics_positive.c: that file calls every wrapper of three
-# flagged messages (one per WIP/deprecated/superseded) plus three flagged
-# enum entries, and must FAIL to build under -Werror, with every individual
+# flagged messages (one per WIP/deprecated/superseded), three individually
+# flagged enum entries and three enums flagged as a whole (an entry and the
+# type name of each), and must FAIL to build under -Werror, with every individual
 # symbol below actually diagnosed - not just the build failing on the first
 # one found, which would hide a regression that drops the attribute from
 # just one wrapper (as happened previously with _pack_status/_encode_status),
@@ -19,7 +20,7 @@ shift
 extra_flags=()
 if "$CC" --version 2>/dev/null | grep -qi clang; then
     # Clang caps itself at 20 errors by default (-ferror-limit=20) and then
-    # bails with "too many errors emitted" - with 27 symbols each producing
+    # bails with "too many errors emitted" - with 33 symbols each producing
     # its own -Werror error, that cap is reached before every symbol below
     # gets a chance to be diagnosed, turning a working feature into a wall
     # of spurious FAILs on any toolchain where CC is clang (e.g. plain `cc`
@@ -74,6 +75,12 @@ for sym in \
     ENTRY_FLAGS_ENUM_WIP \
     ENTRY_FLAGS_ENUM_DEPRECATED \
     ENTRY_FLAGS_ENUM_SUPERSEDED \
+    WIP_ENUM_INHERITS_WIP \
+    DEPRECATED_ENUM_INHERITS_DEPRECATED \
+    SUPERSEDED_ENUM_INHERITS_SUPERSEDED \
+    WIP_ENUM \
+    DEPRECATED_ENUM \
+    SUPERSEDED_ENUM \
     ; do
     # GCC/clang wrap the symbol name in quotes before "is deprecated"/"is
     # unavailable" (ENTRY_FLAGS_ENUM_WIP is unavailable() on a toolchain
@@ -81,8 +88,22 @@ for sym in \
     # but which quote characters (ASCII ' or Unicode fancy quotes) depends
     # on the compiler and locale, so match loosely rather than pin the
     # exact quote glyphs.
-    if ! grep -qE "${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
+    # The leading boundary stops e.g. WIP_ENUM matching the tail of a
+    # longer name.
+    if ! grep -qE "(^|[^A-Za-z0-9_])${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
         echo "FAIL: no diagnostic found for ${sym}" >&2
+        missing=1
+    fi
+done
+
+# an enum whose entries are flagged individually is not itself flagged, nor
+# are its unflagged entries
+for sym in \
+    ENTRY_FLAGS_ENUM \
+    ENTRY_FLAGS_ENUM_PLAIN \
+    ; do
+    if grep -qE "(^|[^A-Za-z0-9_])${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
+        echo "FAIL: unexpected diagnostic for ${sym}" >&2
         missing=1
     fi
 done
@@ -93,4 +114,4 @@ if [ "$missing" -ne 0 ]; then
     exit 1
 fi
 
-echo "OK: all 27 expected diagnostics fired ($(grep -Ec "is (deprecated|unavailable)" "$log") diagnostic lines total)"
+echo "OK: all 33 expected diagnostics fired ($(grep -Ec "is (deprecated|unavailable)" "$log") diagnostic lines total)"
