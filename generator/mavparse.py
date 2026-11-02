@@ -196,6 +196,7 @@ class MAVEnum(object):
         self.name = name
         self.deprecated = None
         self.superseded = None
+        self.wip = False
         self.description = description
         self.entry = []
         self.start_value = None
@@ -287,6 +288,8 @@ class MAVXML(object):
                 check_attrs(attrs, ['name'], 'enum')
                 bitmask = 'bitmask' in attrs and attrs['bitmask'] == 'true'
                 self.enum.append(MAVEnum(attrs['name'], p.CurrentLineNumber, bitmask=bitmask))
+            elif in_element == "mavlink.enums.enum.wip":
+                self.enum[-1].wip = True
             elif in_element == "mavlink.enums.enum.deprecated":
                 check_attrs(attrs, ['since', 'replaced_by'], 'deprecated')
                 self.enum[-1].deprecated = MAVDeprecated(attrs['since'], attrs['replaced_by'])

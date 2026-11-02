@@ -60,6 +60,18 @@ class MAVXMLTest(unittest.TestCase):
         self.assertEqual(messages["SUPERSEDED_MESSAGE"].superseded.replaced_by, "WIP_MESSAGE")
 
         enums = {e.name: e for e in xml.enum}
+        self.assertTrue(enums["WIP_ENUM"].wip)
+        self.assertIsNone(enums["WIP_ENUM"].deprecated)
+        self.assertIsNone(enums["WIP_ENUM"].superseded)
+        self.assertFalse(enums["DEPRECATED_ENUM"].wip)
+        self.assertFalse(enums["SUPERSEDED_ENUM"].wip)
+        self.assertFalse(enums["ENTRY_FLAGS_ENUM"].wip)
+        self.assertIsNone(enums["ENTRY_FLAGS_ENUM"].deprecated)
+        self.assertIsNone(enums["ENTRY_FLAGS_ENUM"].superseded)
+        # an enum-level flag is not copied onto the parsed entries; the
+        # generators apply it to unflagged entries themselves
+        self.assertFalse(enums["WIP_ENUM"].entry[0].wip)
+
         self.assertIsNotNone(enums["DEPRECATED_ENUM"].deprecated)
         self.assertEqual(enums["DEPRECATED_ENUM"].deprecated.replaced_by, "SOME_OTHER_ENUM")
         self.assertIsNotNone(enums["SUPERSEDED_ENUM"].superseded)
