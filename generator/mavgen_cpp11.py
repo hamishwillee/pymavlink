@@ -85,7 +85,7 @@ constexpr auto MAVLINK_VERSION = ${version};
 
 ${{enum:
 /** @brief ${description} */
-enum class ${name}${cxx_underlying_type}
+enum class${ENUM_ATTRIBUTE} ${name}${cxx_underlying_type}
 {
 ${{entry_flt:    ${name_trim}${ENTRY_ATTRIBUTE}=${value}, /* ${description} |${{param:${description}| }} */
 }}
@@ -380,6 +380,17 @@ def fix_int8_t(v):
     return struct.unpack('b', struct.pack('B', v))[0]
 
 
+def enum_flag_attribute(item):
+    '''attribute macro for an enum or enum entry flagged wip/deprecated/superseded'''
+    if item.wip:
+        return ' MAVLINK_ENUM_WIP'
+    if item.deprecated:
+        return ' MAVLINK_ENUM_DEPRECATED'
+    if item.superseded:
+        return ' MAVLINK_ENUM_SUPERSEDED'
+    return ''
+
+
 def generate_one(basename, xml):
     '''generate headers for one XML file'''
 
@@ -500,17 +511,14 @@ def generate_one(basename, xml):
 
         # template do not support "if"
         # filter out ENUM_END, it often > than underlying type may handle
+        # an entry with no wip/deprecated/superseded flag of its own
+        # inherits its enum's; the enum's own attribute goes on the
+        # enum class itself
+        e.ENUM_ATTRIBUTE = enum_flag_attribute(e)
         e.entry_flt = []
         for f in e.entry:
             f.name_trim = enum_remove_prefix(e.name, f.name)
-            if f.wip:
-                f.ENTRY_ATTRIBUTE = ' MAVLINK_ENUM_WIP'
-            elif f.deprecated:
-                f.ENTRY_ATTRIBUTE = ' MAVLINK_ENUM_DEPRECATED'
-            elif f.superseded:
-                f.ENTRY_ATTRIBUTE = ' MAVLINK_ENUM_SUPERSEDED'
-            else:
-                f.ENTRY_ATTRIBUTE = ''
+            f.ENTRY_ATTRIBUTE = enum_flag_attribute(f) or e.ENUM_ATTRIBUTE
             if not f.end_marker:
                 e.entry_flt.append(f)
                 # XXX check all values in acceptable range

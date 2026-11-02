@@ -68,11 +68,33 @@ static void use_flagged_enum_entries()
     (void)s;
 }
 
+static void use_flagged_enums()
+{
+    // these enums are flagged as a whole: their entries carry no flag of
+    // their own and inherit the enum's, and the type name is flagged too
+    auto w = WIP_ENUM::INHERITS_WIP;
+    auto d = DEPRECATED_ENUM::INHERITS_DEPRECATED;
+    auto s = SUPERSEDED_ENUM::INHERITS_SUPERSEDED;
+    (void)w;
+    (void)d;
+    (void)s;
+}
+
+static void use_unflagged_enum()
+{
+    // neither of these may be diagnosed: an enum whose entries are flagged
+    // individually is not itself flagged, and nor are its other entries
+    ENTRY_FLAGS_ENUM e = ENTRY_FLAGS_ENUM::PLAIN;
+    (void)e;
+}
+
 int main()
 {
     use_wip_message();
     use_deprecated_message();
     use_superseded_message();
     use_flagged_enum_entries();
+    use_flagged_enums();
+    use_unflagged_enum();
     return 0;
 }

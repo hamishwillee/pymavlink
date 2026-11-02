@@ -21,7 +21,9 @@
   they never annotate the C++11 message struct itself (see
   MAVLINK_MSG_TYPE_* below for that), but they do still apply to the plain
   C pack/encode/send/decode helper functions that TEST_INTEROP builds pull
-  in from mavlink.h alongside this header.
+  in from mavlink.h alongside this header. When a whole enum is flagged,
+  the MAVLINK_ENUM_* macro is applied to the enum class and to each of its
+  entries that carries no flag of its own.
 */
 #ifndef MAVLINK_WIP
 #define MAVLINK_WIP

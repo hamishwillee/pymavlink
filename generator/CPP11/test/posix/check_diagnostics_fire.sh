@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Drives test_diagnostics_positive.cpp: that file names one flagged message
-# struct per category (WIP/deprecated/superseded) plus all three flagged
-# enum entries, and must FAIL to build under -Werror, with every individual
+# struct per category (WIP/deprecated/superseded), all three individually
+# flagged enum entries and three enums flagged as a whole (an entry and the
+# type name of each), and must FAIL to build under -Werror, with every individual
 # symbol below actually diagnosed - not just the build failing on the first
 # one found, which would hide a regression that guts just one category (as
 # happened with the C++11 struct attribute, and separately with WIP, which
@@ -17,7 +18,7 @@ shift
 
 extra_flags=()
 if "$CXX" --version 2>/dev/null | grep -qi clang; then
-    # Clang caps itself at 20 errors by default (-ferror-limit=20). Only 6
+    # Clang caps itself at 20 errors by default (-ferror-limit=20). Only 12
     # symbols are checked here today, well under that cap, but the C
     # counterpart of this script (27 symbols) hit exactly this with a
     # plain `cc` that turned out to be clang (e.g. macOS) - matching the
@@ -48,7 +49,9 @@ missing=0
 # them fully qualified (mavlink::<dialect>::ENTRY_FLAGS_ENUM::WIP), clang
 # reports just WIP, but the tight .{0,3} window below means the short name
 # still can't cross-match e.g. DEPRECATED_MESSAGE's own diagnostic (there
-# are too many characters between "DEPRECATED" and "is deprecated" there).
+# are too many characters between "DEPRECATED" and "is deprecated" there),
+# and the leading boundary stops it matching the tail of a longer name such
+# as INHERITS_DEPRECATED.
 for sym in \
     WIP_MESSAGE \
     DEPRECATED_MESSAGE \
@@ -56,9 +59,27 @@ for sym in \
     WIP \
     DEPRECATED \
     SUPERSEDED \
+    INHERITS_WIP \
+    INHERITS_DEPRECATED \
+    INHERITS_SUPERSEDED \
+    WIP_ENUM \
+    DEPRECATED_ENUM \
+    SUPERSEDED_ENUM \
     ; do
-    if ! grep -qE "${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
+    if ! grep -qE "(^|[^A-Za-z0-9_])${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
         echo "FAIL: no diagnostic found for ${sym}" >&2
+        missing=1
+    fi
+done
+
+# an enum whose entries are flagged individually is not itself flagged, nor
+# are its unflagged entries
+for sym in \
+    ENTRY_FLAGS_ENUM \
+    PLAIN \
+    ; do
+    if grep -qE "(^|[^A-Za-z0-9_])${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
+        echo "FAIL: unexpected diagnostic for ${sym}" >&2
         missing=1
     fi
 done
@@ -69,4 +90,4 @@ if [ "$missing" -ne 0 ]; then
     exit 1
 fi
 
-echo "OK: all 6 expected diagnostics fired ($(grep -Ec "is (deprecated|unavailable)" "$log") diagnostic lines total)"
+echo "OK: all 12 expected diagnostics fired ($(grep -Ec "is (deprecated|unavailable)" "$log") diagnostic lines total)"
