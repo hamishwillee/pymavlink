@@ -10,6 +10,7 @@ Released under GNU GPL version 3 or later
 '''
 import sys, textwrap, os, time
 from . import mavparse, mavtemplate
+from .mavgen_c import flag_attributes, entry_flag_attribute
 import collections
 import struct
 
@@ -380,20 +381,6 @@ def fix_int8_t(v):
     return struct.unpack('b', struct.pack('B', v))[0]
 
 
-def flag_attributes(wip, deprecated, superseded):
-    '''attribute macros for wip/deprecated/superseded flags.  Every flag
-    that is set gets its macro, so a project that defines the macros
-    differently (e.g. WIP an error, deprecated a warning) sees each one'''
-    attributes = ''
-    if wip:
-        attributes += ' MAVLINK_ENUM_WIP'
-    if deprecated:
-        attributes += ' MAVLINK_ENUM_DEPRECATED'
-    if superseded:
-        attributes += ' MAVLINK_ENUM_SUPERSEDED'
-    return attributes
-
-
 def enum_flag_attribute(enum):
     '''attribute macros for an enum class: only the flags every entry's
     declaration has.  An entry can only be named through its enum class
@@ -404,15 +391,6 @@ def enum_flag_attribute(enum):
     return flag_attributes(enum.wip and all(e.enum_wip for e in entries),
                            enum.deprecated and all(e.enum_deprecated for e in entries),
                            enum.superseded and all(e.enum_superseded for e in entries))
-
-
-def entry_flag_attribute(entry):
-    '''attribute macros for an enum entry: its own flags plus those of
-    the enum declaration it came from, which for an enum extended by
-    another XML file is not necessarily the merged enum'''
-    return flag_attributes(entry.wip or entry.enum_wip,
-                           entry.deprecated or entry.enum_deprecated,
-                           entry.superseded or entry.enum_superseded)
 
 
 def generate_one(basename, xml):
