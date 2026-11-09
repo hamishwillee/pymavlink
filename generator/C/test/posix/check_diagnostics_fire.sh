@@ -2,7 +2,7 @@
 # Drives test_diagnostics_positive.c: that file calls every wrapper of three
 # flagged messages (one per WIP/deprecated/superseded), three individually
 # flagged enum entries, three enums flagged as a whole (an entry and the
-# type name of each) and two enums extended across XML files, and must FAIL to build under -Werror, with every individual
+# type name of each) and three enums extended across XML files, and must FAIL to build under -Werror, with every individual
 # symbol below actually diagnosed - not just the build failing on the first
 # one found, which would hide a regression that drops the attribute from
 # just one wrapper (as happened previously with _pack_status/_encode_status),
@@ -20,7 +20,7 @@ shift
 extra_flags=()
 if "$CC" --version 2>/dev/null | grep -qi clang; then
     # Clang caps itself at 20 errors by default (-ferror-limit=20) and then
-    # bails with "too many errors emitted" - with 38 symbols each producing
+    # bails with "too many errors emitted" - with 41 symbols each producing
     # its own -Werror error, that cap is reached before every symbol below
     # gets a chance to be diagnosed, turning a working feature into a wall
     # of spurious FAILs on any toolchain where CC is clang (e.g. plain `cc`
@@ -84,8 +84,11 @@ for sym in \
     SUPERSEDED_ENUM \
     EXTENDED_DEPRECATED_ENUM_FROM_FLAGGED_BASE \
     EXTENDED_WIP_ENUM_FROM_FLAGGED_DIALECT \
+    EXTENDED_BOTH_DEPRECATED_ENUM_FROM_BASE \
+    EXTENDED_BOTH_DEPRECATED_ENUM_FROM_DIALECT \
     EXTENDED_DEPRECATED_ENUM \
     EXTENDED_WIP_ENUM \
+    EXTENDED_BOTH_DEPRECATED_ENUM \
     ; do
     # GCC/clang wrap the symbol name in quotes before "is deprecated"/"is
     # unavailable" (ENTRY_FLAGS_ENUM_WIP is unavailable() on a toolchain
@@ -114,6 +117,7 @@ for sym in \
     SUPERSEDED_ENUM_ENUM_END \
     EXTENDED_DEPRECATED_ENUM_ENUM_END \
     EXTENDED_WIP_ENUM_ENUM_END \
+    EXTENDED_BOTH_DEPRECATED_ENUM_ENUM_END \
     ; do
     if grep -qE "(^|[^A-Za-z0-9_])${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
         echo "FAIL: unexpected diagnostic for ${sym}" >&2
@@ -127,4 +131,4 @@ if [ "$missing" -ne 0 ]; then
     exit 1
 fi
 
-echo "OK: all 38 expected diagnostics fired ($(grep -Ec "is (deprecated|unavailable)" "$log") diagnostic lines total)"
+echo "OK: all 41 expected diagnostics fired ($(grep -Ec "is (deprecated|unavailable)" "$log") diagnostic lines total)"

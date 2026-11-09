@@ -25,8 +25,11 @@
   is applied to the enum class and to each entry that enum declaration
   contains; an entry flagged itself also carries its own macro. When an
   enum is extended in another XML file, each entry carries only the flags
-  of the declaration it came from, and the enum class carries the flags
-  of every declaration.
+  of the declaration it came from, and the enum class carries only the
+  flags every declaration has: an entry is always named through its enum
+  class (E::ENTRY), so a flag on the enum class would be reported for the
+  entries of an unflagged declaration too. Unlike in C, declaring a
+  variable of such an enum type is therefore not diagnosed.
   Limitations: message fields holding enum values are plain integers, so
   using a flagged enum only through a message field is not diagnosed. A
   clean build therefore does not prove that no flagged enum is used. Only

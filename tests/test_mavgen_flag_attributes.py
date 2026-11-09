@@ -43,12 +43,25 @@ EXPECTED = {
         'EXTENDED_WIP_ENUM_FROM_UNFLAGGED_BASE': [],
         'EXTENDED_WIP_ENUM_FROM_FLAGGED_DIALECT': [WIP],
     }),
+    # flagged deprecated in both files
+    'EXTENDED_BOTH_DEPRECATED_ENUM': ([DEP], {
+        'EXTENDED_BOTH_DEPRECATED_ENUM_FROM_BASE': [DEP],
+        'EXTENDED_BOTH_DEPRECATED_ENUM_FROM_DIALECT': [DEP],
+    }),
     'ENTRY_FLAGS_ENUM': ([], {
         'ENTRY_FLAGS_ENUM_WIP': [WIP],
         'ENTRY_FLAGS_ENUM_DEPRECATED': [DEP],
         'ENTRY_FLAGS_ENUM_SUPERSEDED': [SUP],
         'ENTRY_FLAGS_ENUM_PLAIN': [],
     }),
+}
+
+# C++11 names an entry through its enum class (E::ENTRY), so the enum class
+# carries only the flags every declaration has: a flag on it would be
+# reported for the entries of an unflagged declaration too
+CPP11_TYPE_ATTRIBUTES = {
+    'EXTENDED_DEPRECATED_ENUM': [],
+    'EXTENDED_WIP_ENUM': [],
 }
 
 
@@ -83,7 +96,7 @@ def test_cpp11(tmp_path):
         body = re.search(r'^enum class((?: MAVLINK_ENUM_\w+)*) %s\b.*?\n\{\n(.*?)\n\};' % enum,
                          header, re.S | re.M)
         assert body is not None, enum
-        assert attributes(body.group(1)) == type_attributes, enum
+        assert attributes(body.group(1)) == CPP11_TYPE_ATTRIBUTES.get(enum, type_attributes), enum
         found = dict(re.findall(r'^    (\w+)((?: MAVLINK_ENUM_\w+)*)=', body.group(2), re.M))
         expected = {name[len(enum) + 1:]: a for name, a in entries.items()}
         assert {name: attributes(a) for name, a in found.items()} == expected, enum

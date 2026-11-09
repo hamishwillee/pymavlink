@@ -40,6 +40,13 @@
         <description>Entry from the declaration flagged work-in-progress.</description>
       </entry>
     </enum>
+    <enum name="EXTENDED_BOTH_DEPRECATED_ENUM">
+      <deprecated since="2024-01" replaced_by="SOME_OTHER_ENUM">Use SOME_OTHER_ENUM instead.</deprecated>
+      <description>Extends the enum flagged deprecated in the included file, also flagged deprecated.</description>
+      <entry name="EXTENDED_BOTH_DEPRECATED_ENUM_FROM_DIALECT" value="1">
+        <description>Entry from the including declaration flagged deprecated.</description>
+      </entry>
+    </enum>
     <enum name="ENTRY_FLAGS_ENUM">
       <description>An enum whose entries are individually flagged.</description>
       <entry name="ENTRY_FLAGS_ENUM_WIP" value="0">

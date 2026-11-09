@@ -132,6 +132,13 @@ class MAVXMLTest(unittest.TestCase):
         self.assertTrue(entries["EXTENDED_WIP_ENUM_FROM_FLAGGED_DIALECT"].enum_wip)
         self.assertFalse(entries["EXTENDED_WIP_ENUM_ENUM_END"].enum_wip)
 
+        # flagged in both files: the merged enum and both entries are flagged
+        merged = enums["EXTENDED_BOTH_DEPRECATED_ENUM"]
+        self.assertIsNotNone(merged.deprecated)
+        entries = {e.name: e for e in merged.entry}
+        self.assertIsNotNone(entries["EXTENDED_BOTH_DEPRECATED_ENUM_FROM_BASE"].enum_deprecated)
+        self.assertIsNotNone(entries["EXTENDED_BOTH_DEPRECATED_ENUM_FROM_DIALECT"].enum_deprecated)
+
 
 if __name__ == '__main__':
     unittest.main()

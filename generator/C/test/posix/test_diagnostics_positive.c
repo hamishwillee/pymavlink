@@ -133,12 +133,18 @@ static void use_extended_enums(void)
        flagged if any declaration is */
     int b = EXTENDED_DEPRECATED_ENUM_FROM_FLAGGED_BASE;
     int d = EXTENDED_WIP_ENUM_FROM_FLAGGED_DIALECT;
+    int bb = EXTENDED_BOTH_DEPRECATED_ENUM_FROM_BASE;
+    int bd = EXTENDED_BOTH_DEPRECATED_ENUM_FROM_DIALECT;
     EXTENDED_DEPRECATED_ENUM bt = 0;
     EXTENDED_WIP_ENUM dt = 0;
+    EXTENDED_BOTH_DEPRECATED_ENUM bbt = 0;
     (void)b;
     (void)d;
+    (void)bb;
+    (void)bd;
     (void)bt;
     (void)dt;
+    (void)bbt;
 }
 
 static void use_unflagged_enum(void)
@@ -160,6 +166,7 @@ static void use_unflagged_entries(void)
     int se = SUPERSEDED_ENUM_ENUM_END;
     int ede = EXTENDED_DEPRECATED_ENUM_ENUM_END;
     int ewe = EXTENDED_WIP_ENUM_ENUM_END;
+    int ebe = EXTENDED_BOTH_DEPRECATED_ENUM_ENUM_END;
     (void)d;
     (void)b;
     (void)we;
@@ -167,6 +174,7 @@ static void use_unflagged_entries(void)
     (void)se;
     (void)ede;
     (void)ewe;
+    (void)ebe;
 }
 
 int main(void)

@@ -86,12 +86,16 @@ static void use_flagged_enums()
 static void use_extended_enums()
 {
     // enums extended from wip_deprecated_superseded_base.xml: an entry
-    // carries the flag of the declaration it came from, and the type is
-    // flagged if any declaration is
+    // carries the flag of the declaration it came from, and the type only
+    // the flags every declaration has
     auto b = EXTENDED_DEPRECATED_ENUM::FROM_FLAGGED_BASE;  // diagnosed
     auto d = EXTENDED_WIP_ENUM::FROM_FLAGGED_DIALECT;  // diagnosed
+    auto bb = EXTENDED_BOTH_DEPRECATED_ENUM::FROM_BASE;  // diagnosed
+    auto bd = EXTENDED_BOTH_DEPRECATED_ENUM::FROM_DIALECT;  // diagnosed
     (void)b;
     (void)d;
+    (void)bb;
+    (void)bd;
 }
 
 static void use_unflagged_enum()
@@ -105,7 +109,7 @@ static void use_unflagged_enum()
 static void use_unflagged_entries()
 {
     // neither of these may be diagnosed: entries from an unflagged
-    // declaration of an extended enum
+    // declaration of an extended enum, whose type is therefore not flagged
     auto d = EXTENDED_DEPRECATED_ENUM::FROM_UNFLAGGED_DIALECT;  // not diagnosed
     auto b = EXTENDED_WIP_ENUM::FROM_UNFLAGGED_BASE;  // not diagnosed
     (void)d;

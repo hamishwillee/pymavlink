@@ -2,7 +2,7 @@
 # Drives test_diagnostics_positive.cpp: that file names one flagged message
 # struct per category (WIP/deprecated/superseded), all three individually
 # flagged enum entries, three enums flagged as a whole (an entry and the
-# type name of each) and two enums extended across XML files, and must FAIL
+# type name of each) and three enums extended across XML files, and must FAIL
 # to build under -Werror, with every individual symbol below actually
 # diagnosed - not just the build failing on the first
 # one found, which would hide a regression that guts just one category (as
@@ -19,7 +19,7 @@ shift
 
 extra_flags=()
 if "$CXX" --version 2>/dev/null | grep -qi clang; then
-    # Clang caps itself at 20 errors by default (-ferror-limit=20). Only 17
+    # Clang caps itself at 20 errors by default (-ferror-limit=20). Only 18
     # symbols are checked here today, well under that cap, but the C
     # counterpart of this script (27 symbols) hit exactly this with a
     # plain `cc` that turned out to be clang (e.g. macOS) - matching the
@@ -69,8 +69,9 @@ for sym in \
     SUPERSEDED_ENUM \
     FROM_FLAGGED_BASE \
     FROM_FLAGGED_DIALECT \
-    EXTENDED_DEPRECATED_ENUM \
-    EXTENDED_WIP_ENUM \
+    FROM_BASE \
+    FROM_DIALECT \
+    EXTENDED_BOTH_DEPRECATED_ENUM \
     ; do
     if ! grep -qE "(^|[^A-Za-z0-9_])${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
         echo "FAIL: no diagnostic found for ${sym}" >&2
@@ -80,12 +81,15 @@ done
 
 # an enum whose entries are flagged individually is not itself flagged, nor
 # are its unflagged entries; nor are entries from an unflagged declaration
-# of an extended enum
+# of an extended enum, nor the type of an extended enum one of whose
+# declarations is unflagged
 for sym in \
     ENTRY_FLAGS_ENUM \
     PLAIN \
     FROM_UNFLAGGED_DIALECT \
     FROM_UNFLAGGED_BASE \
+    EXTENDED_DEPRECATED_ENUM \
+    EXTENDED_WIP_ENUM \
     ; do
     if grep -qE "(^|[^A-Za-z0-9_])${sym}.{0,3}is (deprecated|unavailable)" "$log"; then
         echo "FAIL: unexpected diagnostic for ${sym}" >&2
@@ -123,4 +127,4 @@ if [ "$missing" -ne 0 ]; then
     exit 1
 fi
 
-echo "OK: all 17 expected diagnostics fired ($(grep -Ec "is (deprecated|unavailable)" "$log") diagnostic lines total)"
+echo "OK: all 18 expected diagnostics fired ($(grep -Ec "is (deprecated|unavailable)" "$log") diagnostic lines total)"

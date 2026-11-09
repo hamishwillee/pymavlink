@@ -395,8 +395,15 @@ def flag_attributes(wip, deprecated, superseded):
 
 
 def enum_flag_attribute(enum):
-    '''attribute macros for an enum flagged wip/deprecated/superseded'''
-    return flag_attributes(enum.wip, enum.deprecated, enum.superseded)
+    '''attribute macros for an enum class: only the flags every entry's
+    declaration has.  An entry can only be named through its enum class
+    (E::ENTRY), so a flag on the enum class is reported for every entry,
+    including those of an unflagged declaration of an enum extended in
+    another XML file'''
+    entries = [entry for entry in enum.entry if not entry.end_marker]
+    return flag_attributes(enum.wip and all(e.enum_wip for e in entries),
+                           enum.deprecated and all(e.enum_deprecated for e in entries),
+                           enum.superseded and all(e.enum_superseded for e in entries))
 
 
 def entry_flag_attribute(entry):
@@ -529,8 +536,8 @@ def generate_one(basename, xml):
         # template do not support "if"
         # filter out ENUM_END, it often > than underlying type may handle
         # an entry also carries the wip/deprecated/superseded flags of
-        # the enum declaration it came from; the enum's own attributes go
-        # on the enum class itself
+        # the enum declaration it came from; the flags every declaration
+        # has also go on the enum class itself
         e.ENUM_ATTRIBUTE = enum_flag_attribute(e)
         e.entry_flt = []
         for f in e.entry:
