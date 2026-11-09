@@ -93,6 +93,30 @@ for sym in \
     fi
 done
 
+# The symbol checks above cannot see a diagnostic that names a different
+# symbol: an enum entry is always written qualified by its type
+# (E::ENTRY), and a flag on the type is reported against the type's name,
+# not the entry's. So also check each statement in
+# test_diagnostics_positive.cpp marked "// diagnosed" or "// not diagnosed"
+# by its line number.
+diagnosed_lines=" $(grep -oE "^test_diagnostics_positive\.cpp:[0-9]+:[0-9]+: (error|warning)" "$log" | cut -d: -f2 | sort -un | tr '\n' ' ')"
+while IFS=: read -r line text; do
+    case "$text" in
+    *"// not diagnosed"*)
+        if [[ "$diagnosed_lines" == *" $line "* ]]; then
+            echo "FAIL: unexpected diagnostic on line ${line}:${text}" >&2
+            missing=1
+        fi
+        ;;
+    *)
+        if [[ "$diagnosed_lines" != *" $line "* ]]; then
+            echo "FAIL: no diagnostic on line ${line}:${text}" >&2
+            missing=1
+        fi
+        ;;
+    esac
+done < <(grep -nE "// (not )?diagnosed[[:space:]]*$" test_diagnostics_positive.cpp)
+
 if [ "$missing" -ne 0 ]; then
     echo "--- compiler output ---" >&2
     cat "$log" >&2

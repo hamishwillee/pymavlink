@@ -14,7 +14,8 @@
   check_diagnostics_fire.sh driver in the Makefile rule, which requires
   the failure and additionally checks that every individual symbol
   below was actually diagnosed, not just that the build failed for some
-  of them.
+  of them, and that each statement marked "// diagnosed" or "// not
+  diagnosed" is diagnosed on that line or not.
 
   MAVLINK_MSG_TYPE_WIP uses plain deprecated() here, rather than the
   unavailable() protocol.h documents: the point of this file is only to
@@ -42,27 +43,27 @@ using namespace mavlink::wip_deprecated_superseded;
 
 static void use_wip_message()
 {
-    msg::WIP_MESSAGE m{};
+    msg::WIP_MESSAGE m{};  // diagnosed
     (void)m;
 }
 
 static void use_deprecated_message()
 {
-    msg::DEPRECATED_MESSAGE m{};
+    msg::DEPRECATED_MESSAGE m{};  // diagnosed
     (void)m;
 }
 
 static void use_superseded_message()
 {
-    msg::SUPERSEDED_MESSAGE m{};
+    msg::SUPERSEDED_MESSAGE m{};  // diagnosed
     (void)m;
 }
 
 static void use_flagged_enum_entries()
 {
-    ENTRY_FLAGS_ENUM w = ENTRY_FLAGS_ENUM::WIP;
-    ENTRY_FLAGS_ENUM d = ENTRY_FLAGS_ENUM::DEPRECATED;
-    ENTRY_FLAGS_ENUM s = ENTRY_FLAGS_ENUM::SUPERSEDED;
+    ENTRY_FLAGS_ENUM w = ENTRY_FLAGS_ENUM::WIP;  // diagnosed
+    ENTRY_FLAGS_ENUM d = ENTRY_FLAGS_ENUM::DEPRECATED;  // diagnosed
+    ENTRY_FLAGS_ENUM s = ENTRY_FLAGS_ENUM::SUPERSEDED;  // diagnosed
     (void)w;
     (void)d;
     (void)s;
@@ -72,10 +73,10 @@ static void use_flagged_enums()
 {
     // these enums are flagged as a whole: their entries carry no flag of
     // their own and inherit the enum's, and the type name is flagged too
-    auto w = WIP_ENUM::INHERITS_WIP;
-    auto d = DEPRECATED_ENUM::INHERITS_DEPRECATED;
-    auto s = SUPERSEDED_ENUM::INHERITS_SUPERSEDED;
-    auto wd = WIP_ENUM::OWN_DEPRECATED;
+    auto w = WIP_ENUM::INHERITS_WIP;  // diagnosed
+    auto d = DEPRECATED_ENUM::INHERITS_DEPRECATED;  // diagnosed
+    auto s = SUPERSEDED_ENUM::INHERITS_SUPERSEDED;  // diagnosed
+    auto wd = WIP_ENUM::OWN_DEPRECATED;  // diagnosed
     (void)w;
     (void)d;
     (void)s;
@@ -87,8 +88,8 @@ static void use_extended_enums()
     // enums extended from wip_deprecated_superseded_base.xml: an entry
     // carries the flag of the declaration it came from, and the type is
     // flagged if any declaration is
-    auto b = EXTENDED_DEPRECATED_ENUM::FROM_FLAGGED_BASE;
-    auto d = EXTENDED_WIP_ENUM::FROM_FLAGGED_DIALECT;
+    auto b = EXTENDED_DEPRECATED_ENUM::FROM_FLAGGED_BASE;  // diagnosed
+    auto d = EXTENDED_WIP_ENUM::FROM_FLAGGED_DIALECT;  // diagnosed
     (void)b;
     (void)d;
 }
@@ -97,7 +98,7 @@ static void use_unflagged_enum()
 {
     // neither of these may be diagnosed: an enum whose entries are flagged
     // individually is not itself flagged, and nor are its other entries
-    ENTRY_FLAGS_ENUM e = ENTRY_FLAGS_ENUM::PLAIN;
+    ENTRY_FLAGS_ENUM e = ENTRY_FLAGS_ENUM::PLAIN;  // not diagnosed
     (void)e;
 }
 
@@ -105,8 +106,8 @@ static void use_unflagged_entries()
 {
     // neither of these may be diagnosed: entries from an unflagged
     // declaration of an extended enum
-    auto d = EXTENDED_DEPRECATED_ENUM::FROM_UNFLAGGED_DIALECT;
-    auto b = EXTENDED_WIP_ENUM::FROM_UNFLAGGED_BASE;
+    auto d = EXTENDED_DEPRECATED_ENUM::FROM_UNFLAGGED_DIALECT;  // not diagnosed
+    auto b = EXTENDED_WIP_ENUM::FROM_UNFLAGGED_BASE;  // not diagnosed
     (void)d;
     (void)b;
 }
